@@ -1,6 +1,12 @@
 # choosing-technology
 
-> A Vue.js project
+## 问题记录
+
+### 一、'webpack-dev-server' 不是内部或外部命令，也不是可运行的程序 或批处理文件
+
+    将node_modules删除重新运行npm install,安装过程中遇到的有一些警告是mac电脑需要安装的，在windows上不影响，可忽略
+
+### 二、node需要安装稳定版本，如果需要安装指定版本，则在https://nodejs.org/zh-cn/download/releases/这个地址找到对应版本
 
 ## Build Setup
 
@@ -26,5 +32,3 @@ npm run e2e
 # run all tests
 npm test
 ```
-
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
