@@ -1,5 +1,6 @@
 <template>
   <div class="hello">
+
     <!-- table -->
     <!-- <h3>双击编辑单元格，添加一行空数据</h3>
     <div class="header">
@@ -20,53 +21,66 @@
     </el-table> -->
 
     <!-- table2 -->
-    <h3>另一种方式实现编辑单元格，添加数据</h3>
+    <h3>编辑单元格，添加数据</h3>
     <div class="header">
-      <el-button type="primary" size="mini" @click="add2">添加</el-button>
+      <el-button type="primary" size="mini" @click="add2" icon="el-icon-plus">新增</el-button>
     </div>
-    <el-table :data="tableData2" highlight-current-row header-row-class-name="table-headers" @cell-dblclick="tableDbEdit2" style="width: 100%">
-      <el-table-column label="编号" type="index" width="50"></el-table-column>
-      <el-table-column label="默认" width="65">
+    <el-table border :data="tableData2" :header-cell-style="{background:'#0160c1',color:'#ffffff'}" highlight-current-row  @cell-dblclick="tableDbEdit2" style="width: 100%">
+      <el-table-column label="序号" type="index" width="120"></el-table-column>
+
+      <el-table-column label="编码" property="code">
+        <template slot-scope="scope">
+		      <el-input v-if="scope.row.code.edit && scope.row.explain.value!=='系统内置'"
+		        ref="code"
+		        v-model="scope.row.code.value"
+		        style="width: 100%"
+		        @blur="editBlur(scope.row,scope.row.code)">
+		      </el-input>
+		      <span v-else :class="{'grey': scope.row.explain.value =='系统内置'}">{{ scope.row.code.value }}</span>
+		    </template>
+      </el-table-column>
+
+      <el-table-column property="name" label="名称">
+        <template slot-scope="scope">
+		      <el-input v-if="scope.row.name.edit && scope.row.explain.value!=='系统内置'"
+		        ref="name"
+		        v-model="scope.row.name.value"
+		        style="width: 100%"
+		        @blur="editBlur(scope.row,scope.row.name)">
+		      </el-input>
+		      <span v-else :class="{'grey': scope.row.explain.value =='系统内置'}">{{ scope.row.name.value }}</span>
+		    </template>
+      </el-table-column>
+
+      <el-table-column label="默认">
         <template slot-scope="scope">
           <div>
             <el-radio :label="scope.row.id" v-model="templateRadio" @change.native="getTemplateRow2(scope.$index,scope.row)">&nbsp;</el-radio>
           </div>
         </template>
       </el-table-column>
-      <el-table-column property="date" label="日期">
+
+      <el-table-column property="explain" label="说明">
         <template slot-scope="scope">
-		      <el-date-picker v-if="scope.row.date.edit"
-		        v-model="scope.row.date.value"
-		        ref="date"
+		      <el-input v-if="scope.row.explain.edit && scope.row.explain.value!=='系统内置'"
+		        ref="explain"
+		        v-model="scope.row.explain.value"
 		        style="width: 100%"
-		        type="date"
-		        value-format="yyyy-MM-dd"
-		        @blur="editBlur(scope.row,scope.row.date)">
-		      </el-date-picker>
-		      <span v-else>{{ scope.row.date.value }}</span>
+		        @blur="editBlur(scope.row,scope.row.explain)">
+		      </el-input>
+		      <span v-else :class="{'grey': scope.row.explain.value =='系统内置'}">{{ scope.row.explain.value }}</span>
 		    </template>
       </el-table-column>
-      <el-table-column property="name" label="姓名">
+
+      <el-table-column label="操作">
         <template slot-scope="scope">
-		      <el-input v-if="scope.row.name.edit"
-		        ref="name"
-		        v-model="scope.row.name.value"
-		        style="width: 100%"
-		        @blur="editBlur(scope.row,scope.row.name)">
-		      </el-input>
-		      <span v-else>{{ scope.row.name.value }}</span>
-		    </template>
-      </el-table-column>
-      <el-table-column property="address" label="地址">
-        <template slot-scope="scope">
-		      <el-input v-if="scope.row.address.edit"
-		        ref="address"
-		        v-model="scope.row.address.value"
-		        style="width: 100%"
-		        @blur="editBlur(scope.row,scope.row.address)">
-		      </el-input>
-		      <span v-else>{{ scope.row.address.value }}</span>
-		    </template>
+          <el-button
+            size="mini"
+            type="danger"
+            icon="el-icon-delete"
+            :disabled = "scope.row.explain.value =='系统内置'"
+            @click="del(scope.row.id)">删除</el-button>
+        </template>
       </el-table-column>
     </el-table>
     <!-- 树形 -->
@@ -102,25 +116,35 @@ export default {
           }],
       */
       tableData2: [{
-        id:'1',
-        date: {value:'2016-05-02',edit:false},
-        name: {value:"王一",edit:false},
-        address: {value:"北京市丰台区1号",edit:false}
-      }, {
-        id:'2',
-        date: {value:'2016-05-02',edit:false},
-        name: {value:"王一",edit:false},
-        address: {value:"北京市丰台区1号",edit:false}
-      }, {
-        id:'3',
-        date: {value:'2016-05-02',edit:false},
-        name: {value:"王一",edit:false},
-        address: {value:"北京市丰台区1号",edit:false}
-      }, {
-        id:'4',
-        date: {value:'2016-05-02',edit:false},
-        name: {value:"王一",edit:false},
-        address:{value:"北京市丰台区1号",edit:false}
+          id:'1',
+          code: {value:'01',edit:false},
+          name: {value:"公开",edit:false},
+          explain: {value:"系统内置",edit:false}
+        }, {
+          id:'2',
+          code: {value:'02',edit:false},
+          name: {value:"内部",edit:false},
+          explain: {value:"系统内置",edit:false}
+        }, {
+          id:'3',
+          code: {value:'03',edit:false},
+          name: {value:"秘密",edit:false},
+          explain: {value:"系统内置",edit:false}
+        }, {
+          id:'4',
+          code:{value:'04',edit:false},
+          name: {value:"机密",edit:false},
+          explain:{value:"系统内置",edit:false}
+        },{
+          id:'5',
+          code:{value:'05',edit:false},
+          name: {value:"绝密",edit:false},
+          explain:{value:"系统内置",edit:false}
+        },{
+          id:'6',
+          code:{value:'06',edit:false},
+          name: {value:"非密",edit:false},
+          explain:{value:"用户自定义",edit:false}
       }],
       currentRow: null,
       /*treeData: [{
@@ -216,7 +240,7 @@ export default {
       // 双击单元格可编辑
       tableDbEdit2(row, column, cell, event){
         let _this = this;
-        if(row[column.property]){
+        if(row[column.property] && row.explain.value!=='系统内置'){
           row[column.property].edit=true
           setTimeout(()=>{
             _this.$refs[column.property].focus()
@@ -234,12 +258,39 @@ export default {
       // 添加
       add2(){
         this.tableData2.push({
-          id:this.tableData2[this.tableData2.length-1].id+1,
-          date: {value:'',edit:true},
-          name: {value:"",edit:true},
-          address:{value:"",edit:true}
+          id: this.tableData2[this.tableData2.length-1].id+1,
+          code: {value:'03',edit:false},
+          name: {value:"秘密",edit:false},
+          explain: {value:"用户自定义",edit:false}
         })
       },
+      // 删除
+      del(id){
+        let _this=this; 
+        _this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          let index='';
+          for(let i=0;i<_this.tableData2.length;i++){
+            if(_this.tableData2[i].id==id){
+              index=i;
+              break;
+            }
+          }
+          _this.tableData2.splice(index,1)
+          _this.$notify.success({
+            title: '',
+            message: '删除成功'
+          });
+        }).catch(() => {
+          _this.$notify.success({
+            title: '',
+            message: '取消删除'
+          });        
+        });
+      }
       // 树状
       /*handleNodeClick(data) {
         console.log(data);
@@ -255,13 +306,12 @@ export default {
   width: 100%;
   display: flex;
   justify-content: flex-start;
+  margin-bottom: 10px;
 }
 .table-headers{
   background-color: blue;
 }
-</style>
-<style lang="">
-  .table-headers{
-  background-color: blue;
+.grey{
+  color: #aeb0b3;
 }
 </style>
