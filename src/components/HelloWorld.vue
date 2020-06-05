@@ -15,7 +15,7 @@
       <el-table-column property="address" label="地址"></el-table-column>
     </el-table>
     <!-- 树形 -->
-    
+    <el-tree :data="treeData" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
   </div>
 </template>
 <script>
@@ -45,16 +45,59 @@ export default {
           name: '王4',
           address: '北京市丰台区4号'
         }],
-        currentRow: null
+        currentRow: null,
+        treeData: [{
+          label: '一级 1',
+          children: [{
+            label: '二级 1-1',
+            children: [{
+              label: '三级 1-1-1'
+            }]
+          }]
+        }, {
+          label: '一级 2',
+          children: [{
+            label: '二级 2-1',
+            children: [{
+              label: '三级 2-1-1'
+            }]
+          }, {
+            label: '二级 2-2',
+            children: [{
+              label: '三级 2-2-1'
+            }]
+          }]
+        }, {
+          label: '一级 3',
+          children: [{
+            label: '二级 3-1',
+            children: [{
+              label: '三级 3-1-1'
+            }]
+          }, {
+            label: '二级 3-2',
+            children: [{
+              label: '三级 3-2-1'
+            }]
+          }]
+        }],
+        defaultProps: {
+          children: 'children',
+          label: 'label'
+        }
+  
     }
   },
   methods: {
+      // 单选
       getTemplateRow(index,row){
         console.log(index,row)
       },
       // 双击单元格可编辑
       tableDbEdit(row, column, cell, event){
+        let _this = this;
         if (column.label != "单选") {
+            let flag=true;
             let texts = event.target.innerText
             event.target.innerHTML = "";
             let cellInput = document.createElement("input");
@@ -64,10 +107,27 @@ export default {
             cell.appendChild(cellInput);
             cellInput.focus()
             cellInput.onblur = function() {
-              cell.removeChild(cellInput);
-              event.target.innerHTML = cellInput.value;
+              if(cellInput.value==""){
+                _this.$notify.error({
+                  title: '',
+                  message: '内容不能为空！'
+                });
+                cellInput.focus()
+              }else{
+                _this.$notify.success({
+                  title: '',
+                  message: '修改成功！'
+                });
+                cell.removeChild(cellInput);
+                event.target.innerHTML = cellInput.value;
+                flag=true
+              }
             };
         }
+      },
+      // 树状
+      handleNodeClick(data) {
+        console.log(data);
       }
     }
 }
