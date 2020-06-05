@@ -1,6 +1,10 @@
 <template>
   <div class="hello">
     <!-- table -->
+    <h3>双击编辑单元格，添加一行空数据</h3>
+    <div class="header">
+      <el-button type="primary" size="mini" @click="add">添加</el-button>
+    </div>
     <el-table :data="tableData" highlight-current-row  @cell-dblclick="tableDbEdit" style="width: 100%">
       <el-table-column label="编号" type="index" width="50"></el-table-column>
       <el-table-column label="默认" width="65">
@@ -14,8 +18,59 @@
       <el-table-column property="name" label="姓名"></el-table-column>
       <el-table-column property="address" label="地址"></el-table-column>
     </el-table>
+
+    <!-- table2 -->
+    <h3>另一种方式实现编辑单元格，添加数据</h3>
+    <div class="header">
+      <el-button type="primary" size="mini" @click="add2">添加</el-button>
+    </div>
+    <el-table :data="tableData2" highlight-current-row  @cell-dblclick="tableDbEdit2" style="width: 100%">
+      <el-table-column label="编号" type="index" width="50"></el-table-column>
+      <el-table-column label="默认" width="65">
+        <template slot-scope="scope">
+          <div>
+            <el-radio :label="scope.row.id" v-model="templateRadio" @change.native="getTemplateRow2(scope.$index,scope.row)">&nbsp;</el-radio>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column property="date" label="日期">
+        <template slot-scope="scope">
+		      <el-date-picker v-if="scope.row.date.edit"
+		        v-model="scope.row.date.value"
+		        ref="date"
+		        style="width: 100%"
+		        type="date"
+		        value-format="yyyy-MM-dd"
+		        @blur="scope.row.date.edit = false">
+		      </el-date-picker>
+		      <span v-else>{{ scope.row.date.value }}</span>
+		    </template>
+      </el-table-column>
+      <el-table-column property="name" label="姓名">
+        <template slot-scope="scope">
+		      <el-input v-if="scope.row.name.edit"
+		        ref="name"
+		        v-model="scope.row.name.value"
+		        style="width: 100%"
+		        @blur="scope.row.name.edit = false">
+		      </el-input>
+		      <span v-else>{{ scope.row.name.value }}</span>
+		    </template>
+      </el-table-column>
+      <el-table-column property="address" label="地址">
+        <template slot-scope="scope">
+		      <el-input v-if="scope.row.address.edit"
+		        ref="address"
+		        v-model="scope.row.address.value"
+		        style="width: 100%"
+		        @blur="scope.row.address.edit = false">
+		      </el-input>
+		      <span v-else>{{ scope.row.address.value }}</span>
+		    </template>
+      </el-table-column>
+    </el-table>
     <!-- 树形 -->
-    <el-tree :data="treeData" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
+    <!-- <el-tree :data="treeData" :props="defaultProps" @node-click="handleNodeClick"></el-tree> -->
   </div>
 </template>
 <script>
@@ -23,7 +78,7 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      templateRadio:'2016-05-04',
+      templateRadio:'1',
       tableData: [{
           id:'1',
           date: '2016-05-02',
@@ -45,7 +100,28 @@ export default {
           name: '王4',
           address: '北京市丰台区4号'
         }],
-        currentRow: null,
+      tableData2: [{
+        id:'1',
+        date: {value:'2016-05-02',edit:false},
+        name: {value:"王一",edit:false},
+        address: {value:"北京市丰台区1号",edit:false}
+      }, {
+        id:'2',
+        date: {value:'2016-05-02',edit:false},
+        name: {value:"王一",edit:false},
+        address: {value:"北京市丰台区1号",edit:false}
+      }, {
+        id:'3',
+        date: {value:'2016-05-02',edit:false},
+        name: {value:"王一",edit:false},
+        address: {value:"北京市丰台区1号",edit:false}
+      }, {
+        id:'4',
+        date: {value:'2016-05-02',edit:false},
+        name: {value:"王一",edit:false},
+        address:{value:"北京市丰台区1号",edit:false}
+      }],
+      currentRow: null,
         treeData: [{
           label: '一级 1',
           children: [{
@@ -93,6 +169,10 @@ export default {
       getTemplateRow(index,row){
         console.log(index,row)
       },
+      // 单选
+      getTemplateRow2(index,row){
+        console.log(index,row)
+      },
       // 双击单元格可编辑
       tableDbEdit(row, column, cell, event){
         let _this = this;
@@ -125,6 +205,31 @@ export default {
             };
         }
       },
+      // 双击单元格可编辑
+      tableDbEdit2(row, column, cell, event){
+        let _this = this;
+        if(row[column.property]){
+          row[column.property].edit=true
+          setTimeout(()=>{
+            _this.$refs[column.property].focus()
+          })
+        }
+      },
+      add(){
+        this.tableData.push({
+          date: '2016',
+          name: '王2',
+          address: '北京市丰台区2号'
+        })
+      },
+      add2(){
+        this.tableData2.push({
+          id:this.tableData2[this.tableData2.length-1].id+1,
+          date: {value:'',edit:true},
+          name: {value:"",edit:true},
+          address:{value:"",edit:true}
+        })
+      },
       // 树状
       handleNodeClick(data) {
         console.log(data);
@@ -135,10 +240,12 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.hello{
-  margin-left: 100px;
-}
 .pointer{
   cursor:pointer;
+}
+.header{
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
 }
 </style>
