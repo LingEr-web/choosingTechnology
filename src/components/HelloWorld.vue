@@ -1,18 +1,21 @@
 <template>
   <div class="hello">
-    <el-table ref="singleTable" :data="tableData" highlight-current-row @current-change="handleCurrentChange" @cell-dblclick="tableDbEdit" style="width: 100%">
-    <el-table-column label="编号" type="index" width="50"></el-table-column>
-    <el-table-column label="单选" width="65">
-      <template slot-scope="scope">
-        <div>
-          <el-radio :label="scope.row.date" v-model="templateRadio" @change.native="getTemplateRow(scope.$index,scope.row)">&nbsp;</el-radio>
-        </div>
-      </template>
-    </el-table-column>
-    <el-table-column property="date" label="日期"></el-table-column>
-    <el-table-column property="name" label="姓名"></el-table-column>
-    <el-table-column property="address" label="地址"></el-table-column>
-  </el-table>
+    <!-- table -->
+    <el-table :data="tableData" highlight-current-row  @cell-dblclick="tableDbEdit" style="width: 100%">
+      <el-table-column label="编号" type="index" width="50"></el-table-column>
+      <el-table-column label="默认" width="65">
+        <template slot-scope="scope">
+          <div>
+            <el-radio :label="scope.row.date" v-model="templateRadio" @change.native="getTemplateRow(scope.$index,scope.row)">&nbsp;</el-radio>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column property="date" label="日期"></el-table-column>
+      <el-table-column property="name" label="姓名"></el-table-column>
+      <el-table-column property="address" label="地址"></el-table-column>
+    </el-table>
+    <!-- 树形 -->
+    
   </div>
 </template>
 <script>
@@ -22,18 +25,22 @@ export default {
     return {
       templateRadio:'2016-05-04',
       tableData: [{
+          id:'1',
           date: '2016-05-02',
           name: '王1',
           address: '北京市丰台区1号'
         }, {
+          id:'2',
           date: '2016-05-04',
           name: '王2',
           address: '北京市丰台区2号'
         }, {
+          id:'3',
           date: '2016-05-01',
           name: '王3',
           address: '北京市丰台区3号'
         }, {
+          id:'4',
           date: '2016-05-03',
           name: '王4',
           address: '北京市丰台区4号'
@@ -42,12 +49,6 @@ export default {
     }
   },
   methods: {
-      setCurrent(row) {
-        this.$refs.singleTable.setCurrentRow(row);
-      },
-      handleCurrentChange(val) {
-        this.currentRow = val;
-      },
       getTemplateRow(index,row){
         console.log(index,row)
       },
