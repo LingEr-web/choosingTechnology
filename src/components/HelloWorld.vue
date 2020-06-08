@@ -112,17 +112,27 @@
         default-expand-all
         :expand-on-click-node="false">
         <div class="custom-tree-node" slot-scope="{ node, data }">
-          <el-input v-if="data.edit"
-		        v-model="data.label"
-            size="mini"
-		        style="width: 100%"
-            :ref="`tree${data.id}`"
-		        @blur="editTreeBlur(node,data)">
-		      </el-input>
-          <div class="custom-tree-node-text" v-else @dblclick="editTree(node,data)" @click="() => append(node,data)">
-            <span v-if="node.label.code">{{ node.label.code }}&nbsp;&nbsp;</span>
-            <span v-if="node.label.cont">{{ node.label.cont }}</span>
+          <div 
+            :class="{'custom-tree-node-text':(!data.label.codeedit)&&(!data.label.contedit)}" 
+            v-if="(!data.label.codeedit)||(!data.label.contedit)" 
+            @dblclick="editTree(node,data)" 
+            @click="() => append(node,data)"
+            >
+            <span v-if="node.label.code && (!node.label.codeedit)">{{ node.label.code }}&nbsp;&nbsp;</span>
+            <span v-if="node.label.cont && (!node.label.contedit)">{{ node.label.cont }}</span>
           </div>
+          <el-input v-if="data.label.codeedit"
+		        v-model="data.label.code"
+            size="mini"
+            :ref="`treeCode${data.id}`"
+		        @blur="editTreeBlur(node,data,'treeCode')">
+		      </el-input>
+          <el-input v-if="data.label.contedit"
+		        v-model="data.label.cont"
+            size="mini"
+            :ref="`treeCont${data.id}`"
+		        @blur="editTreeBlur(node,data,'treeCont')">
+		      </el-input>
         </div>
       </el-tree>
     </div>
@@ -194,57 +204,65 @@ export default {
       treeData:  [
         {
         id: 1,
-        edit:false,
         label: {
           code:'',
+          codeedit:false,
+          contedit:false,
           cont:'DEMO01'
         },
         children: [
           {
             id: 3,
-            edit:false,
             label: {
               code:'A',
-              cont:'系统差异码'
+              cont:'系统差异码',
+              codeedit:false,
+              contedit:false,
             },
             children: [
               {
                 id: 6,
                 label: {
                   code:'A0',
-                  cont:'牵引系统'
+                  cont:'牵引系统',
+                  codeedit:false,
+                  contedit:false,
                 },
-                edit:false,
                 children: [
                   {
                     id: 9,
                     label: {
                       code:'10',
-                      cont:'动力分系统'
+                      cont:'动力分系统',
+                      codeedit:false,
+                      contedit:false,
                     },
-                    edit:false,
                     children:[
                       {
                         id: 12,
                         label: {
                           code:'1000',
-                          cont:'发动机单元'
+                          cont:'发动机单元',
+                          codeedit:false,
+                          contedit:false,
                         },
-                        edit:false,
                         children:[
                           {
                             id:13,
                             label:{
                               code:'10',
-                              cont:'邮箱分解'
+                              cont:'邮箱分解',
+                              codeedit:false,
+                              contedit:false,
                             },
-                            edit:false,
                             children:[
                               {
                                 id:14,
                                 label:{
                                   code:'A',
-                                  cont:'油箱盖'
+                                  cont:'油箱盖',
+                                  codeedit:false,
+                                  contedit:false,
                                 }
                               }
                             ]
@@ -257,17 +275,19 @@ export default {
                     id: 10,
                     label: {
                       code:'11',
-                      cont:'燃油系统'
+                      cont:'燃油系统',
+                      codeedit:false,
+                      contedit:false,
                     },
-                    edit:false,
                   },
                   {
                     id: 11,
                     label: {
                       code:'12',
-                      cont:'加热系统'
+                      cont:'加热系统',
+                      codeedit:false,
+                      contedit:false,
                     },
-                    edit:false,
                   },
                 ]
               },
@@ -276,37 +296,41 @@ export default {
           },
           {
             id: 4,
-            edit:false,
             label: {
               code:'B',
-              cont:'系统差异码'
+              cont:'系统差异码',
+              codeedit:false,
+              contedit:false,
             },
             children: [
               {
                 id: 7,
                 label: {
                   code:'10',
-                  cont:''
+                  cont:'',
+                  codeedit:false,
+                  contedit:false,
                 },
-                edit:false,
               }
             ]
           },
           {
             id: 5,
-            edit:false,
             label: {
               code:'C',
-              cont:'系统差异码'
+              cont:'系统差异码',
+              codeedit:false,
+              contedit:false,
             },
             children: [
               {
                 id: 8,
                 label: {
                   code:'10',
-                  cont:''
+                  cont:'',
+                  codeedit:false,
+                  contedit:false,
                 },
-                edit:false,
               }
             ]
           }
@@ -316,16 +340,18 @@ export default {
           id: 2,
           label:  {
             code:'',
-            cont:'DEMO02'
+            cont:'DEMO02',
+            codeedit:false,
+            contedit:false,
           },
-          edit:false,
           children: [{
             id: 6,
             label:{
               code:'',
-              cont:'enter text'
+              cont:'enter text',
+              codeedit:false,
+              contedit:false,
             },
-            edit:false,
           }]
         }
       ],
@@ -441,14 +467,14 @@ export default {
     },
     // 添加
     addTreeNode(data){
-      const newChild = { id: this.treeDataId++, label: {code:'00',cont:'未定义'},edit:true, children: [] };
+      const newChild = { id: this.treeDataId++, label: {code:'00',cont:'未定义',codeedit:true,contedit:true,}, children: [] };
       if (!data.children) {
         this.$set(data, 'children', []);
       }
       data.children.push(newChild);
       setTimeout(()=>{
         this.$refs.trees.setCurrentKey(newChild.id);
-        this.$refs[`tree${newChild.id}`].focus()
+        this.$refs[`treeCode${newChild.id}`].focus()
       })
     },
     // 删除
@@ -460,18 +486,27 @@ export default {
     },
     // 编辑
     editTree(node,data){
-      data.edit=true;
+      data.label.codeedit=true;
+      data.label.contedit=true;
       setTimeout(()=>{
-        this.$refs[`tree${data.id}`].focus()
+        this.$refs[`treeCode${data.id}`].focus()
       })
     },
     // 失去焦点提交
-    editTreeBlur(node,data){
-      data.edit=false
-      this.$notify.success({
-        title: '',
-        message: '修改成功！'
-      });
+    editTreeBlur(node,data,events){
+      if(events=='treeCode'){
+        data.label.codeedit=false;
+        this.$notify.success({
+          title: '',
+          message: '修改成功！'
+        });
+      }else if(events=='treeCont'){
+        data.label.contedit=false;
+        this.$notify.success({
+          title: '',
+          message: '修改成功！'
+        });
+      }
     },
   }
 }
