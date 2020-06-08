@@ -83,8 +83,49 @@
         </template>
       </el-table-column>
     </el-table>
+    <div class="table-pagination">
+      <el-pagination
+      background
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentPage4"
+      :page-sizes="[10,20,30]"
+      :page-size="10"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="50">
+      </el-pagination>
+    </div>
+    
     <!-- 树形 -->
-    <!-- <el-tree :data="treeData" :props="defaultProps" @node-click="handleNodeClick"></el-tree> -->
+    <div class="block">
+      <div class="tree-btn">
+        <el-button type="primary" size="mini" @click="addTreeNode(addTreeData)" icon="el-icon-plus"></el-button>
+        <el-button type="danger" size="mini" @click="delTreeNode(delTreeData,addTreeData)" icon="el-icon-delete"></el-button>
+      </div>
+      <el-tree
+        :data="treeData"
+        show-checkbox
+        node-key="id"
+        ref="trees"
+        :indent=15
+        highlight-current
+        default-expand-all
+        :expand-on-click-node="false">
+        <div class="custom-tree-node" slot-scope="{ node, data }">
+          <el-input v-if="data.edit"
+		        v-model="data.label"
+            size="mini"
+		        style="width: 100%"
+            :ref="`tree${data.id}`"
+		        @blur="editTreeBlur(node,data)">
+		      </el-input>
+          <div class="custom-tree-node-text" v-else @dblclick="editTree(node,data)" @click="() => append(node,data)">
+            <span v-if="node.label.code">{{ node.label.code }}&nbsp;&nbsp;</span>
+            <span v-if="node.label.cont">{{ node.label.cont }}</span>
+          </div>
+        </div>
+      </el-tree>
+    </div>
   </div>
 </template>
 <script>
@@ -147,157 +188,303 @@ export default {
           explain:{value:"用户自定义",edit:false}
       }],
       currentRow: null,
-      /*treeData: [{
-        label: '一级 1',
-        children: [{
-          label: '二级 1-1',
+      addTreeData:null,
+      delTreeData:null,
+      treeDataId:1000,
+      treeData:  [
+        {
+        id: 1,
+        edit:false,
+        label: {
+          code:'',
+          cont:'DEMO01'
+        },
+        children: [
+          {
+            id: 3,
+            edit:false,
+            label: {
+              code:'A',
+              cont:'系统差异码'
+            },
+            children: [
+              {
+                id: 6,
+                label: {
+                  code:'A0',
+                  cont:'牵引系统'
+                },
+                edit:false,
+                children: [
+                  {
+                    id: 9,
+                    label: {
+                      code:'10',
+                      cont:'动力分系统'
+                    },
+                    edit:false,
+                    children:[
+                      {
+                        id: 12,
+                        label: {
+                          code:'1000',
+                          cont:'发动机单元'
+                        },
+                        edit:false,
+                        children:[
+                          {
+                            id:13,
+                            label:{
+                              code:'10',
+                              cont:'邮箱分解'
+                            },
+                            edit:false,
+                            children:[
+                              {
+                                id:14,
+                                label:{
+                                  code:'A',
+                                  cont:'油箱盖'
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    id: 10,
+                    label: {
+                      code:'11',
+                      cont:'燃油系统'
+                    },
+                    edit:false,
+                  },
+                  {
+                    id: 11,
+                    label: {
+                      code:'12',
+                      cont:'加热系统'
+                    },
+                    edit:false,
+                  },
+                ]
+              },
+              
+            ]
+          },
+          {
+            id: 4,
+            edit:false,
+            label: {
+              code:'B',
+              cont:'系统差异码'
+            },
+            children: [
+              {
+                id: 7,
+                label: {
+                  code:'10',
+                  cont:''
+                },
+                edit:false,
+              }
+            ]
+          },
+          {
+            id: 5,
+            edit:false,
+            label: {
+              code:'C',
+              cont:'系统差异码'
+            },
+            children: [
+              {
+                id: 8,
+                label: {
+                  code:'10',
+                  cont:''
+                },
+                edit:false,
+              }
+            ]
+          }
+        ]
+        }, 
+        {
+          id: 2,
+          label:  {
+            code:'',
+            cont:'DEMO02'
+          },
+          edit:false,
           children: [{
-            label: '三级 1-1-1'
+            id: 6,
+            label:{
+              code:'',
+              cont:'enter text'
+            },
+            edit:false,
           }]
-        }]
-        }, {
-          label: '一级 2',
-          children: [{
-            label: '二级 2-1',
-            children: [{
-              label: '三级 2-1-1'
-            }]
-          }, {
-            label: '二级 2-2',
-            children: [{
-              label: '三级 2-2-1'
-            }]
-          }]
-        }, {
-          label: '一级 3',
-          children: [{
-            label: '二级 3-1',
-            children: [{
-              label: '三级 3-1-1'
-            }]
-          }, {
-            label: '二级 3-2',
-            children: [{
-              label: '三级 3-2-1'
-            }]
-          }]
-        }],
+        }
+      ],
       defaultProps: {
         children: 'children',
         label: 'label'
-      }*/
+      },
+      currentPage4:4
     }
   },
   methods: {
-      // 单选
-      /*getTemplateRow(index,row){
-        console.log(index,row)
-      },*/
-      // 双击单元格可编辑
-      /*tableDbEdit(row, column, cell, event){
-        let _this = this;
-        if (column.label != "单选") {
-            let flag=true;
-            let texts = event.target.innerText
-            event.target.innerHTML = "";
-            let cellInput = document.createElement("input");
-            cellInput.value = texts;
-            cellInput.setAttribute("type", "text");
-            cellInput.style.width = "80%";
-            cell.appendChild(cellInput);
+    handleSizeChange(){
+
+    },
+    handleCurrentChange(){
+
+    },
+    // 双击单元格可编辑
+    /*tableDbEdit(row, column, cell, event){
+      let _this = this;
+      if (column.label != "单选") {
+        let flag=true;
+        let texts = event.target.innerText
+        event.target.innerHTML = "";
+        let cellInput = document.createElement("input");
+        cellInput.value = texts;
+        cellInput.setAttribute("type", "text");
+        cellInput.style.width = "80%";
+        cell.appendChild(cellInput);
+        cellInput.focus()
+        cellInput.onblur = function() {
+          if(cellInput.value==""){
+            _this.$notify.error({
+              title: '',
+              message: '内容不能为空！'
+            });
             cellInput.focus()
-            cellInput.onblur = function() {
-              if(cellInput.value==""){
-                _this.$notify.error({
-                  title: '',
-                  message: '内容不能为空！'
-                });
-                cellInput.focus()
-              }else{
-                _this.$notify.success({
-                  title: '',
-                  message: '修改成功！'
-                });
-                cell.removeChild(cellInput);
-                event.target.innerHTML = cellInput.value;
-                flag=true
-              }
-            };
-        }
-      },*/
-      // 添加
-      /*add(){
-        this.tableData.push({
-          date: '2016',
-          name: '王2',
-          address: '北京市丰台区2号'
-        })
-      },*/
-      // 单选
-      getTemplateRow2(index,row){
-        console.log(index,row)
-      },
-      // 双击单元格可编辑
-      tableDbEdit2(row, column, cell, event){
-        let _this = this;
-        if(row[column.property] && row.explain.value!=='系统内置'){
-          row[column.property].edit=true
-          setTimeout(()=>{
-            _this.$refs[column.property].focus()
-          })
-        }
-      },
-      // 失去焦点验证提交
-      editBlur(row,td){
-        td.edit=false
-        this.$notify.success({
-          title: '',
-          message: '修改成功！'
-        });
-      },
-      // 添加
-      add2(){
-        this.tableData2.push({
-          id: this.tableData2[this.tableData2.length-1].id+1,
-          code: {value:'03',edit:false},
-          name: {value:"秘密",edit:false},
-          explain: {value:"用户自定义",edit:false}
-        })
-      },
-      // 删除
-      del(id){
-        let _this=this; 
-        _this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          let index='';
-          for(let i=0;i<_this.tableData2.length;i++){
-            if(_this.tableData2[i].id==id){
-              index=i;
-              break;
-            }
+          }else{
+            _this.$notify.success({
+              title: '',
+              message: '修改成功！'
+            });
+            cell.removeChild(cellInput);
+            event.target.innerHTML = cellInput.value;
+            flag=true
           }
-          _this.tableData2.splice(index,1)
-          _this.$notify.success({
-            title: '',
-            message: '删除成功'
-          });
-        }).catch(() => {
-          _this.$notify.success({
-            title: '',
-            message: '取消删除'
-          });        
-        });
+        };
       }
-      // 树状
-      /*handleNodeClick(data) {
-        console.log(data);
-      }*/
-    }
+    },*/
+    // 单选
+    getTemplateRow2(index,row){
+      console.log(index,row)
+    },
+    // 双击单元格可编辑
+    tableDbEdit2(row, column, cell, event){
+      let _this = this;
+      if(row[column.property] && row.explain.value!=='系统内置'){
+        row[column.property].edit=true
+        setTimeout(()=>{
+          _this.$refs[column.property].focus()
+        })
+      }
+    },
+    // 失去焦点验证提交
+    editBlur(row,td){
+      td.edit=false
+      this.$notify.success({
+        title: '',
+        message: '修改成功！'
+      });
+    },
+    // 添加
+    add2(){
+      this.tableData2.push({
+        id: this.tableData2[this.tableData2.length-1].id+1,
+        code: {value:'03',edit:false},
+        name: {value:"秘密",edit:false},
+        explain: {value:"用户自定义",edit:false}
+      })
+    },
+    // 删除
+    del(id){
+      let _this=this; 
+      _this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        let index='';
+        for(let i=0;i<_this.tableData2.length;i++){
+          if(_this.tableData2[i].id==id){
+            index=i;
+            break;
+          }
+        }
+        _this.tableData2.splice(index,1)
+        _this.$notify.success({
+          title: '',
+          message: '删除成功'
+        });
+      }).catch(() => {
+        _this.$notify.success({
+          title: '',
+          message: '取消删除'
+        });        
+      });
+    },
+    // 树状
+    // 选中
+    append(node,data){
+      this.addTreeData=data;
+      this.delTreeData=node;
+    },
+    // 添加
+    addTreeNode(data){
+      const newChild = { id: this.treeDataId++, label: {code:'00',cont:'未定义'},edit:true, children: [] };
+      if (!data.children) {
+        this.$set(data, 'children', []);
+      }
+      data.children.push(newChild);
+      setTimeout(()=>{
+        this.$refs.trees.setCurrentKey(newChild.id);
+        this.$refs[`tree${newChild.id}`].focus()
+      })
+    },
+    // 删除
+    delTreeNode(node,data){
+      const parent = node.parent;
+      const children = parent.data.children || parent.data;
+      const index = children.findIndex(d => d.id === data.id);
+      children.splice(index, 1);
+    },
+    // 编辑
+    editTree(node,data){
+      data.edit=true;
+      setTimeout(()=>{
+        this.$refs[`tree${data.id}`].focus()
+      })
+    },
+    // 失去焦点提交
+    editTreeBlur(node,data){
+      data.edit=false
+      this.$notify.success({
+        title: '',
+        message: '修改成功！'
+      });
+    },
+  }
 }
 </script>
+<style>
+  .el-tree-node__content{
+    height: 40px;
+  }
+  .el-tree--highlight-current .el-tree-node.is-current>.el-tree-node__content{
+    background-color: rgb(1, 96, 193);
+    color: #ffffff;
+  }
+</style>
 <style scoped>
 .pointer{
   cursor:pointer;
@@ -313,5 +500,33 @@ export default {
 }
 .grey{
   color: #aeb0b3;
+}
+.table-pagination{
+  width: 100%;
+  height: 60px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+.tree-btn{
+  width: 100%;
+  height: 100px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+.custom-tree-node{
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+.custom-tree-node-text{
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 }
 </style>
