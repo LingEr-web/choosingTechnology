@@ -500,6 +500,10 @@ export default {
           title: '',
           message: '修改成功！'
         });
+        setTimeout(()=>{
+          this.$refs.trees.setCurrentKey(this.treeDataId);
+          this.$refs[`treeCont${data.id}`].focus()
+        })
       }else if(events=='treeCont'){
         data.label.contedit=false;
         this.$notify.success({
