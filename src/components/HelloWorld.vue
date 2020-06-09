@@ -1,25 +1,5 @@
 <template>
   <div class="hello">
-
-    <!-- table -->
-    <!-- <h3>双击编辑单元格，添加一行空数据</h3>
-    <div class="header">
-      <el-button type="primary" size="mini" @click="add">添加</el-button>
-    </div>
-    <el-table :data="tableData" highlight-current-row  @cell-dblclick="tableDbEdit" style="width: 100%">
-      <el-table-column label="编号" type="index" width="50"></el-table-column>
-      <el-table-column label="默认" width="65">
-        <template slot-scope="scope">
-          <div>
-            <el-radio :label="scope.row.date" v-model="templateRadio" @change.native="getTemplateRow(scope.$index,scope.row)">&nbsp;</el-radio>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column property="date" label="日期"></el-table-column>
-      <el-table-column property="name" label="姓名"></el-table-column>
-      <el-table-column property="address" label="地址"></el-table-column>
-    </el-table> -->
-
     <!-- table2 -->
     <h3>编辑单元格，添加数据</h3>
     <div class="header">
@@ -101,12 +81,16 @@
       <div class="tree-btn">
         <el-button type="primary" size="mini" @click="addTreeNode(addTreeData)" icon="el-icon-plus"></el-button>
         <el-button type="danger" size="mini" @click="delTreeNode(delTreeData,addTreeData)" icon="el-icon-delete"></el-button>
+        <el-button type="primary" size="mini" @click="upTreeNode(delTreeData,addTreeData)" icon="el-icon-top"></el-button>
+        <el-button type="primary" size="mini" @click="downTreeNode(delTreeData,addTreeData)" icon="el-icon-bottom"></el-button>
       </div>
       <el-tree
         :data="treeData"
         node-key="id"
+        :key="tree_key"
         ref="trees"
         :indent=15
+        :default-expanded-keys="defaultExpand"
         highlight-current
         default-expand-all
         @node-click="treeClick"
@@ -145,28 +129,6 @@ export default {
   data () {
     return {
       templateRadio:'1',
-      /* tableData: [{
-          id:'1',
-          date: '2016-05-02',
-           name: '王1',
-           address: '北京市丰台区1号'
-         }, {
-           id:'2',
-           date: '2016-05-04',
-           name: '王2',
-           address: '北京市丰台区2号'
-         }, {
-           id:'3',
-           date: '2016-05-01',
-           name: '王3',
-           address: '北京市丰台区3号'
-         }, {
-           id:'4',
-           date: '2016-05-03',
-           name: '王4',
-           address: '北京市丰台区4号'
-          }],
-      */
       tableData2: [{
           id:'1',
           code: {value:'01',edit:false},
@@ -198,9 +160,12 @@ export default {
           name: {value:"非密",edit:false},
           explain:{value:"用户自定义",edit:false}
       }],
+      tree_key: 0,
+      defaultExpand:[],
       currentRow: null,
       addTreeData:null,
       delTreeData:null,
+      downNodeStore:null,
       isTreeEdit:false,
       editTreeId:null,
       treeDataId:1000,
@@ -461,11 +426,11 @@ export default {
     },
     // 树状
     // 选中
-    treeClick(data,node,events){
+    treeClick(data,node){
       this.addTreeData=data;
       this.delTreeData=node;
       if(this.isTreeEdit){
-         this.$refs.trees.setCurrentKey(this.editTreeId);
+        this.$refs.trees.setCurrentKey(this.editTreeId);
       }
     },
     // 添加
@@ -515,6 +480,49 @@ export default {
         });
       }
     },
+    // 节点上移
+    upTreeNode(node,data){
+      const parent=node.parent;
+      const children =parent.data.children || parent.data;
+      const cIndex = children.findIndex(d=>d.id===data.id);
+      if(parent.level===0 && cIndex===0){
+        return;
+      }else if(parent.level!==0 && cIndex===0){
+        alert('不同父节点中移动')
+      }else if((parent.level === 0 && cIndex !== 0) || (parent.level !== 0 && cIndex !== 0)){
+        const tempChildrenNodex1 = children[cIndex - 1]
+        const tempChildrenNodex2 = children[cIndex]
+        this.$set(children, cIndex - 1, tempChildrenNodex2)
+        this.$set(children, cIndex, tempChildrenNodex1)
+        this.defaultExpand[0] = data.id;
+        setTimeout(()=>{
+          this.$refs.trees.setCurrentKey(data.id);
+        })
+      }
+      this.tree_key++;
+    },
+    // 节点下移
+    downTreeNode(node, data){
+      const parent=node.parent;
+      const children =parent.data.children || parent.data;
+      const cIndex = children.findIndex(d=>d.id===data.id);
+      const cLength = children.length - 1
+      if(cIndex===cLength){
+        alert('不能移动')
+      }else if(cIndex===cLength){
+        alert('不能移动')
+      }else if(cIndex!==cLength){
+        const tempChildrenNodex1 = children[cIndex + 1]
+        const tempChildrenNodex2 = children[cIndex]
+        this.$set(children, cIndex + 1, tempChildrenNodex2)
+        this.$set(children, cIndex, tempChildrenNodex1)
+        this.defaultExpand[0] = data.id;
+        setTimeout(()=>{
+          this.$refs.trees.setCurrentKey(data.id);
+        })
+      }
+      this.tree_key++;
+    }
   }
 }
 </script>
