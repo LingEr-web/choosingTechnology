@@ -25,7 +25,7 @@
     <div class="header">
       <el-button type="primary" size="mini" @click="add2" icon="el-icon-plus">新增</el-button>
     </div>
-    <el-table border :data="tableData2" :header-cell-style="{background:'#0160c1',color:'#ffffff'}" highlight-current-row  @cell-dblclick="tableDbEdit2" style="width: 100%">
+    <el-table border :data="tableData2" :header-cell-style="{background:'#409EFF',color:'#ffffff'}" highlight-current-row  @cell-dblclick="tableDbEdit2" style="width: 100%">
       <el-table-column label="序号" type="index" width="120"></el-table-column>
 
       <el-table-column label="编码" property="code">
@@ -104,19 +104,18 @@
       </div>
       <el-tree
         :data="treeData"
-        show-checkbox
         node-key="id"
         ref="trees"
         :indent=15
         highlight-current
         default-expand-all
+        @node-click="treeClick"
         :expand-on-click-node="false">
         <div class="custom-tree-node" slot-scope="{ node, data }">
           <div 
             :class="{'custom-tree-node-text':(!data.label.codeedit)&&(!data.label.contedit)}" 
             v-if="(!data.label.codeedit)||(!data.label.contedit)" 
-            @dblclick="editTree(node,data)" 
-            @click="() => append(node,data)"
+            @dblclick="editTree(data)" 
             >
             <span v-if="node.label.code && (!node.label.codeedit)">{{ node.label.code }}&nbsp;&nbsp;</span>
             <span v-if="node.label.cont && (!node.label.contedit)">{{ node.label.cont }}</span>
@@ -124,12 +123,14 @@
           <el-input v-if="data.label.codeedit"
 		        v-model="data.label.code"
             size="mini"
+            style="margin-right:10px;"
             :ref="`treeCode${data.id}`"
 		        @blur="editTreeBlur(node,data,'treeCode')">
 		      </el-input>
           <el-input v-if="data.label.contedit"
 		        v-model="data.label.cont"
             size="mini"
+            style="margin-right:10px;"
             :ref="`treeCont${data.id}`"
 		        @blur="editTreeBlur(node,data,'treeCont')">
 		      </el-input>
@@ -200,6 +201,8 @@ export default {
       currentRow: null,
       addTreeData:null,
       delTreeData:null,
+      isTreeEdit:false,
+      editTreeId:null,
       treeDataId:1000,
       treeData:  [
         {
@@ -363,12 +366,9 @@ export default {
     }
   },
   methods: {
-    handleSizeChange(){
-
-    },
-    handleCurrentChange(){
-
-    },
+    // 分页
+    handleSizeChange(){},
+    handleCurrentChange(){},
     // 双击单元格可编辑
     /*tableDbEdit(row, column, cell, event){
       let _this = this;
@@ -461,9 +461,12 @@ export default {
     },
     // 树状
     // 选中
-    append(node,data){
+    treeClick(data,node,events){
       this.addTreeData=data;
       this.delTreeData=node;
+      if(this.isTreeEdit){
+         this.$refs.trees.setCurrentKey(this.editTreeId);
+      }
     },
     // 添加
     addTreeNode(data){
@@ -472,10 +475,7 @@ export default {
         this.$set(data, 'children', []);
       }
       data.children.push(newChild);
-      setTimeout(()=>{
-        this.$refs.trees.setCurrentKey(newChild.id);
-        this.$refs[`treeCode${newChild.id}`].focus()
-      })
+      this.editTree(newChild)
     },
     // 删除
     delTreeNode(node,data){
@@ -485,27 +485,30 @@ export default {
       children.splice(index, 1);
     },
     // 编辑
-    editTree(node,data){
+    editTree(data){
       data.label.codeedit=true;
       data.label.contedit=true;
+      this.editTreeId=data.id;
       setTimeout(()=>{
-        this.$refs[`treeCode${data.id}`].focus()
+        this.$refs.trees.setCurrentKey(data.id);
+        this.$refs[`treeCode${data.id}`].focus();
       })
     },
     // 失去焦点提交
     editTreeBlur(node,data,events){
       if(events=='treeCode'){
-        data.label.codeedit=false;
         this.$notify.success({
           title: '',
           message: '修改成功！'
         });
+        data.label.codeedit=false;
+        this.isTreeEdit=true;
         setTimeout(()=>{
-          this.$refs.trees.setCurrentKey(this.treeDataId);
           this.$refs[`treeCont${data.id}`].focus()
         })
       }else if(events=='treeCont'){
         data.label.contedit=false;
+        this.isTreeEdit=false;
         this.$notify.success({
           title: '',
           message: '修改成功！'
@@ -520,7 +523,7 @@ export default {
     height: 40px;
   }
   .el-tree--highlight-current .el-tree-node.is-current>.el-tree-node__content{
-    background-color: rgb(1, 96, 193);
+    background-color: #409EFF;
     color: #ffffff;
   }
 </style>
@@ -535,7 +538,7 @@ export default {
   margin-bottom: 10px;
 }
 .table-headers{
-  background-color: blue;
+  background-color: #409EFF;
 }
 .grey{
   color: #aeb0b3;
